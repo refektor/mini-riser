@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groove Glide - Debug UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            overflow: hidden;
+            height: 100vh;
+            user-select: none;
+        }
+
+        .plugin-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            transition: all 0.3s ease;
+        }
+
+        .plugin-header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .plugin-title {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .debug-info {
+            background: rgba(0, 0, 0, 0.5);
+            color: #00ff88;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .plugin-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .knob-container {
+            position: relative;
+            z-index: 10;
+        }
+
+        .knob-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .knob {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+        }
+
+        .knob:hover {
+            transform: scale(1.05) rotateX(5deg);
+        }
+
+        .knob:active {
+            transform: scale(0.98) rotateX(10deg);
+        }
+
+        .knob-track {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 135deg,
+                transparent 0deg,
+                rgba(255, 255, 255, 0.1) 270deg,
+                transparent 270deg
+            );
+            padding: 4px;
+        }
+
+        .knob-progress {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc(100% - 8px);
+            height: calc(100% - 8px);
+            border-radius: 50%;
+            background: conic-gradient(
+                from 135deg,
+                #00ff88 0deg,
+                #0099ff 90deg,
+                #ff6600 180deg,
+                #ff0066 270deg,
+                transparent 270deg
+            );
+            clip-path: circle(50% at 50% 50%);
+            transform: rotate(0deg);
+            transition: transform 0.2s ease-out;
+        }
+
+        .knob-inner {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: calc(100% - 16px);
+            height: calc(100% - 16px);
+            border-radius: 50%;
+            background: radial-gradient(
+                circle at 30% 30%,
+                rgba(255, 255, 255, 0.4),
+                rgba(255, 255, 255, 0.1) 40%,
+                rgba(0, 0, 0, 0.3) 70%,
+                rgba(0, 0, 0, 0.8)
+            );
+            box-shadow: 
+                inset 0 0 20px rgba(0, 0, 0, 0.5),
+                inset 0 0 40px rgba(255, 255, 255, 0.1),
+                0 8px 32px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(0deg);
+            transition: transform 0.2s ease-out;
+        }
+
+        .knob-pointer {
+            width: 4px;
+            height: 60px;
+            background: linear-gradient(to bottom, #fff, #00ff88);
+            border-radius: 2px;
+            position: absolute;
+            top: 15px;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .knob-label {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #fff;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .knob-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00ff88;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            min-width: 80px;
+        }
+
+        .visual-feedback {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .wave-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+        }
+
+        .wave {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid;
+            border-radius: 50%;
+            opacity: 0;
+            animation-duration: 3s;
+            animation-iteration-count: infinite;
+            animation-timing-function: ease-out;
+        }
+
+        .wave-1 {
+            width: 200px;
+            height: 200px;
+            border-color: rgba(0, 255, 136, 0.6);
+            animation-name: wave-expand;
+            animation-delay: 0s;
+        }
+
+        .wave-2 {
+            width: 250px;
+            height: 250px;
+            border-color: rgba(0, 153, 255, 0.4);
+            animation-name: wave-expand;
+            animation-delay: 1s;
+        }
+
+        .wave-3 {
+            width: 300px;
+            height: 300px;
+            border-color: rgba(255, 102, 0, 0.3);
+            animation-name: wave-expand;
+            animation-delay: 2s;
+        }
+
+        @keyframes wave-expand {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #00ff88;
+            border-radius: 50%;
+            opacity: 0;
+            animation: particle-float 4s ease-out infinite;
+        }
+
+        @keyframes particle-float {
+            0% {
+                opacity: 0;
+                transform: translateY(0) scale(0);
+            }
+            20% {
+                opacity: 1;
+                transform: translateY(-20px) scale(1);
+            }
+            80% {
+                opacity: 1;
+                transform: translateY(-200px) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-300px) scale(0);
+            }
+        }
+
+        .plugin-footer {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .effect-indicators {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .effect-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .indicator-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .indicator-light.active {
+            background: #00ff88;
+            box-shadow: 
+                0 0 10px rgba(0, 255, 136, 0.8),
+                inset 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        .effect-indicator span {
+            font-size: 0.7em;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .plugin-container.impact-high {
+            background: linear-gradient(135deg, #2d1b4e 0%, #4a2c7a 50%, #6b46c1 100%);
+        }
+
+        .plugin-container.impact-medium {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #3b82f6 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="plugin-container">
+        <header class="plugin-header">
+            <h1 class="plugin-title">GROOVE GLIDE</h1>
+            <div class="subtitle">Multi-Effect Processor - Debug Mode</div>
+        </header>
+        
+        <div class="debug-info" id="debug-info">
+            Debug: Waiting for interaction...
+        </div>
+        
+        <main class="plugin-main">
+            <div class="knob-container">
+                <div class="knob-wrapper">
+                    <div class="knob" id="impact-knob">
+                        <div class="knob-inner">
+                            <div class="knob-pointer"></div>
+                        </div>
+                        <div class="knob-track">
+                            <div class="knob-progress" id="knob-progress"></div>
+                        </div>
+                    </div>
+                    <div class="knob-label">IMPACT</div>
+                    <div class="knob-value" id="impact-value">0</div>
+                </div>
+            </div>
+            
+            <div class="visual-feedback" id="visual-feedback">
+                <div class="wave-container">
+                    <div class="wave wave-1"></div>
+                    <div class="wave wave-2"></div>
+                    <div class="wave wave-3"></div>
+                </div>
+                <div class="particles-container" id="particles-container">
+                </div>
+            </div>
+        </main>
+        
+        <footer class="plugin-footer">
+            <div class="effect-indicators">
+                <div class="effect-indicator" data-effect="eq">
+                    <div class="indicator-light" id="eq-light"></div>
+                    <span>EQ</span>
+                </div>
+                <div class="effect-indicator" data-effect="transient">
+                    <div class="indicator-light" id="transient-light"></div>
+                    <span>TRANSIENT</span>
+                </div>
+                <div class="effect-indicator" data-effect="crusher">
+                    <div class="indicator-light" id="crusher-light"></div>
+                    <span>CRUSHER</span>
+                </div>
+                <div class="effect-indicator" data-effect="panner">
+                    <div class="indicator-light" id="panner-light"></div>
+                    <span>PANNER</span>
+                </div>
+                <div class="effect-indicator" data-effect="reverb">
+                    <div class="indicator-light" id="reverb-light"></div>
+                    <span>REVERB</span>
+                </div>
+                <div class="effect-indicator" data-effect="delay">
+                    <div class="indicator-light" id="delay-light"></div>
+                    <span>DELAY</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+        // Debug-enabled version of the Groove Glide UI
+        class GrooveGlideUIDebug {
+            constructor() {
+                this.isDragging = false;
+                this.lastY = 0;
+                this.currentValue = 0;
+                this.minValue = 0;
+                this.maxValue = 100;
+                
+                this.debugElement = document.getElementById('debug-info');
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.startVisualEffects();
+                
+                this.log("UI initialized successfully");
+            }
+            
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                this.debugElement.textContent = `[${timestamp}] ${message}`;
+                console.log(`GrooveGlide Debug: ${message}`);
+            }
+            
+            initializeElements() {
+                this.knob = document.getElementById('impact-knob');
+                this.knobInner = this.knob.querySelector('.knob-inner');
+                this.knobProgress = document.getElementById('knob-progress');
+                this.valueDisplay = document.getElementById('impact-value');
+                this.pluginContainer = document.querySelector('.plugin-container');
+                this.particlesContainer = document.getElementById('particles-container');
+                
+                this.effectLights = {
+                    eq: document.getElementById('eq-light'),
+                    transient: document.getElementById('transient-light'),
+                    crusher: document.getElementById('crusher-light'),
+                    panner: document.getElementById('panner-light'),
+                    reverb: document.getElementById('reverb-light'),
+                    delay: document.getElementById('delay-light')
+                };
+                
+                this.log("Elements initialized");
+            }
+            
+            setupEventListeners() {
+                this.knob.addEventListener('mousedown', (e) => this.startDrag(e));
+                this.knob.addEventListener('touchstart', (e) => this.startDrag(e), { passive: false });
+                
+                document.addEventListener('mousemove', (e) => this.onDrag(e));
+                document.addEventListener('touchmove', (e) => this.onDrag(e), { passive: false });
+                
+                document.addEventListener('mouseup', () => this.endDrag());
+                document.addEventListener('touchend', () => this.endDrag());
+                
+                this.knob.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
+                
+                this.knob.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    this.resetToDefault();
+                });
+                
+                this.log("Event listeners set up");
+            }
+            
+            startDrag(event) {
+                this.log("Mouse/touch down detected");
+                event.preventDefault();
+                this.isDragging = true;
+                this.lastY = this.getEventY(event);
+                
+                this.knob.style.cursor = 'grabbing';
+                document.body.style.cursor = 'grabbing';
+                
+                this.log(`Drag started at Y: ${this.lastY}`);
+            }
+            
+            onDrag(event) {
+                if (!this.isDragging) return;
+                
+                event.preventDefault();
+                const currentY = this.getEventY(event);
+                const deltaY = this.lastY - currentY;
+                const sensitivity = 0.5;
+                const valueChange = deltaY * sensitivity;
+                
+                const oldValue = this.currentValue;
+                this.currentValue = Math.max(this.minValue, Math.min(this.maxValue, this.currentValue + valueChange));
+                
+                if (oldValue !== this.currentValue) {
+                    this.updateKnobVisual();
+                    this.log(`Value changed from ${oldValue.toFixed(1)} to ${this.currentValue.toFixed(1)} (delta: ${deltaY})`);
+                }
+                
+                this.lastY = currentY;
+            }
+            
+            endDrag() {
+                if (!this.isDragging) return;
+                
+                this.isDragging = false;
+                this.knob.style.cursor = 'pointer';
+                document.body.style.cursor = 'default';
+                
+                this.log("Drag ended");
+            }
+            
+            onWheel(event) {
+                event.preventDefault();
+                const delta = -event.deltaY;
+                const sensitivity = 0.1;
+                const valueChange = delta * sensitivity;
+                
+                const oldValue = this.currentValue;
+                this.currentValue = Math.max(this.minValue, Math.min(this.maxValue, this.currentValue + valueChange));
+                
+                if (oldValue !== this.currentValue) {
+                    this.updateKnobVisual();
+                    this.log(`Wheel: Value changed to ${this.currentValue.toFixed(1)}`);
+                }
+            }
+            
+            getEventY(event) {
+                return event.touches ? event.touches[0].clientY : event.clientY;
+            }
+            
+            updateKnobVisual() {
+                const normalizedValue = this.currentValue / this.maxValue;
+                const rotationDegrees = (normalizedValue * 270) - 135;
+                
+                this.knobInner.style.transform = `rotate(${rotationDegrees}deg)`;
+                this.knobProgress.style.transform = `rotate(${normalizedValue * 270}deg)`;
+                
+                this.valueDisplay.textContent = Math.round(this.currentValue);
+                
+                this.updateVisualFeedback(normalizedValue);
+                this.updateEffectIndicators(normalizedValue);
+            }
+            
+            updateVisualFeedback(normalizedValue) {
+                const intensity = normalizedValue;
+                
+                if (intensity > 0.7) {
+                    this.pluginContainer.className = 'plugin-container impact-high';
+                } else if (intensity > 0.3) {
+                    this.pluginContainer.className = 'plugin-container impact-medium';
+                } else {
+                    this.pluginContainer.className = 'plugin-container';
+                }
+                
+                this.generateParticles(intensity);
+                
+                const waves = document.querySelectorAll('.wave');
+                waves.forEach((wave, index) => {
+                    const delay = index * 0.5;
+                    const animationDuration = Math.max(1, 3 - (intensity * 1.5));
+                    wave.style.animationDuration = `${animationDuration}s`;
+                    wave.style.animationDelay = `${delay}s`;
+                    wave.style.opacity = intensity > 0.1 ? intensity * 0.8 : 0;
+                });
+            }
+            
+            updateEffectIndicators(normalizedValue) {
+                const thresholds = {
+                    eq: 0.1,
+                    transient: 0.2,
+                    crusher: 0.3,
+                    panner: 0.4,
+                    reverb: 0.6,
+                    delay: 0.7
+                };
+                
+                Object.entries(thresholds).forEach(([effect, threshold]) => {
+                    const light = this.effectLights[effect];
+                    if (light) {
+                        if (normalizedValue >= threshold) {
+                            light.classList.add('active');
+                        } else {
+                            light.classList.remove('active');
+                        }
+                    }
+                });
+            }
+            
+            generateParticles(intensity) {
+                if (intensity < 0.2) return;
+                
+                const particleCount = Math.floor(intensity * 5);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    setTimeout(() => {
+                        this.createParticle();
+                    }, i * 200);
+                }
+            }
+            
+            createParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const startX = Math.random() * window.innerWidth;
+                const hue = Math.random() * 360;
+                
+                particle.style.left = `${startX}px`;
+                particle.style.bottom = '20%';
+                particle.style.background = `hsl(${hue}, 80%, 60%)`;
+                particle.style.boxShadow = `0 0 10px hsl(${hue}, 80%, 60%)`;
+                
+                this.particlesContainer.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 4000);
+            }
+            
+            resetToDefault() {
+                this.currentValue = 0;
+                this.updateKnobVisual();
+                this.log("Reset to default value: 0");
+            }
+            
+            startVisualEffects() {
+                setInterval(() => {
+                    if (this.currentValue > 50) {
+                        this.createRandomParticle();
+                    }
+                }, 500);
+            }
+            
+            createRandomParticle() {
+                if (Math.random() > 0.7) {
+                    this.createParticle();
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const ui = new GrooveGlideUIDebug();
+            window.grooveGlideUI = ui;
+        });
+    </script>
+</body>
+</html>

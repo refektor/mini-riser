@@ -1,0 +1,21 @@
+# Build directories
+build/
+cmake-build-*/
+
+# JUCE JavaScript files (auto-generated)
+source/ui/public/js/juce/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
