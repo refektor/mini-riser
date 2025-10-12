@@ -9,7 +9,6 @@
 }
 
 body {
-    background: #000;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
@@ -17,58 +16,51 @@ body {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    position: relative;
+    background: #f0f0f0;
 }
 
-/* Character Container Background */
-.character-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    z-index: 1;
-}
-
-.dancer-svg {
-    position: absolute;
-    transform-origin: bottom center;
-    transition: transform 0.2s ease-in-out;
-}
-
-.container {
+.plugin-container {
     position: relative;
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10;
+}
+
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../imgs/sas2-ui-bg.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 1;
+}
+
+.knob-container {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .knob {
-    width: 80px;
-    height: 80px;
     cursor: pointer;
-    position: relative;
-    border-radius: 50%;
-    background: #fff;
-    transition: transform 0.1s ease-out;
-}
-
-.knob:before {
-    content: '';
     position: absolute;
-    top: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 3px;
-    height: 20px;
-    background: #000;
-    border-radius: 2px;
+    background-image: url('../imgs/sas2-ui-knob.png');
+    background-repeat: no-repeat;
+    background-size: 310px 310px;
+    width: 310px;
+    height: 310px;
+    transition: transform 0.1s ease-out;
+    transform-origin: 155px 155px;
 }
 
 .knob:active {
-    transform: scale(0.95);
+    transform: scale(1.0);
 }

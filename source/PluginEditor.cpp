@@ -19,9 +19,9 @@ GrooveGlideAudioProcessorEditor::GrooveGlideAudioProcessorEditor (GrooveGlideAud
 {
     addAndMakeVisible (webView);
     webView.goToURL(webView.getResourceProviderRoot());
-    setSize (800, 600);
-    setResizable(true, true);
-    setResizeLimits(600, 400, 1200, 800);
+    setSize (310, 310);
+    //setResizable(true, true);
+    //setResizeLimits(600, 400, 1200, 800);
 }
 
 GrooveGlideAudioProcessorEditor::~GrooveGlideAudioProcessorEditor()
@@ -111,11 +111,23 @@ juce::String GrooveGlideAudioProcessorEditor::getMimeForExtension(const juce::St
 std::optional<juce::WebBrowserComponent::Resource> 
 GrooveGlideAudioProcessorEditor::getResource(const juce::String& url)
 {
-    // Copy sas1-plugin approach exactly
+    // Debug logging to file
+    juce::File debugFile = juce::File::getSpecialLocation(juce::File::userDesktopDirectory)
+                                   .getChildFile("PluginResourceDebug.txt");
+    juce::String debugMessage = juce::Time::getCurrentTime().toString(true, true) + 
+                               ": Requested URL: " + url + "\n";
+    debugFile.appendText(debugMessage);
+    
     const auto resourceToRetrieve = url == "/" ? "index.html" : url.fromLastOccurrenceOf("/", false, false);
     
-    // Convert resourceToRetrieve to a valid C++ identifier (exactly like sas1-plugin)
-    juce::String resourceName = resourceToRetrieve.replaceCharacter('/', '_').replaceCharacter('.', '_').removeCharacters("-");
+    // Convert resourceToRetrieve to a valid C++ identifier (exactly like JUCE does)
+    juce::String resourceName = resourceToRetrieve.replaceCharacter('/', '_')
+                                                  .replaceCharacter('.', '_')
+                                                  .removeCharacters("-")       // Remove dashes (don't replace with underscores)
+                                                  .removeCharacters(" ");      // Remove spaces
+    
+    debugFile.appendText("  Resource to retrieve: " + resourceToRetrieve + "\n");
+    debugFile.appendText("  Converted resource name: " + resourceName + "\n");
     
     // Get the resource data and size
     int resourceSize = 0;
@@ -123,6 +135,7 @@ GrooveGlideAudioProcessorEditor::getResource(const juce::String& url)
 
     if (resourceData != nullptr && resourceSize > 0)
     {
+        debugFile.appendText("  Found resource, size: " + juce::String(resourceSize) + "\n");
         const auto extension = resourceToRetrieve.fromLastOccurrenceOf(".", false, false);
         return juce::WebBrowserComponent::Resource{
             std::vector<std::byte>(reinterpret_cast<const std::byte*>(resourceData), 
@@ -131,5 +144,6 @@ GrooveGlideAudioProcessorEditor::getResource(const juce::String& url)
         };
     }
 
+    debugFile.appendText("  Resource NOT FOUND!\n");
     return std::nullopt;
 }
