@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Current state
   let currentValue = 0; // 0-100
+  let smoothedValue = 0; // Smoothed value for animations
   let isDragging = false;
   let lastMouseY = 0;
   
@@ -104,7 +105,12 @@ document.addEventListener("DOMContentLoaded", () => {
    */
   function animateDancers() {
     const bpm = currentBPM;
-    const paramValue = currentValue; // Use the knob's current value
+    
+    // Smoothly interpolate towards the current value to avoid glitching
+    const smoothingFactor = 0.1; // Adjust this for faster/slower smoothing (0.05-0.2 range)
+    smoothedValue += (currentValue - smoothedValue) * smoothingFactor;
+    
+    const paramValue = smoothedValue; // Use smoothed value for animations
 
     // Map BPM to animation speed
     const beatInterval = (60 / bpm) * 1000;

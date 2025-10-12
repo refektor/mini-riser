@@ -207,8 +207,9 @@ void GrooveGlideAudioProcessor::updateEffectParameters(float impactValue)
     juce::dsp::Reverb::Parameters reverbParams;
     reverbParams.roomSize = 0.8f;
     reverbParams.damping = 0.3f;
-    reverbParams.wetLevel = normalizedImpact * 0.5f;
-    reverbParams.dryLevel = 1.0f;  // Keep dry signal at full level always
+    float reverbWetLevel = normalizedImpact * 0.5f;
+    reverbParams.wetLevel = reverbWetLevel;
+    reverbParams.dryLevel = 1.0f - reverbWetLevel;  // Proper wet/dry mix
     reverbParams.width = 1.0f;
     leftReverb.setParameters(reverbParams);
     rightReverb.setParameters(reverbParams);
@@ -272,13 +273,18 @@ void GrooveGlideAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
         }
         
         if (currentImpact > 0.0f) {
-            float lfoValue = lfoForPanning.processSample(0.0f) * currentImpact;
-            float leftPan = 1.0f - (lfoValue * 0.5f);
-            float rightPan = 1.0f + (lfoValue * 0.5f);
+            float lfoValue = lfoForPanning.processSample(0.0f);
+            // Apply impact scaling to LFO for panning depth control
+            float panAmount = lfoValue * currentImpact;
+            
+            // Equal-power panning: when pan = 0, both channels at full volume
+            // when pan = ±1, signal fully to one side
+            float leftGain = std::cos((panAmount + 1.0f) * juce::MathConstants<float>::pi * 0.25f);
+            float rightGain = std::sin((panAmount + 1.0f) * juce::MathConstants<float>::pi * 0.25f);
             
             for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
-                leftData[sample] *= leftPan;
-                rightData[sample] *= rightPan;
+                leftData[sample] *= leftGain;
+                rightData[sample] *= rightGain;
             }
         }
         
@@ -297,7 +303,10 @@ void GrooveGlideAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
                 
                 float delayedSample = delayData[readIndex];
                 float input = channelData[sample];
-                float output = input + (delayedSample * currentWetLevel);
+                
+                // Proper mix: blend dry and wet signals instead of adding
+                float dryLevel = 1.0f - currentWetLevel;
+                float output = (input * dryLevel) + (delayedSample * currentWetLevel);
                 
                 delayData[delayParams.writeIndex] = input + (delayedSample * currentFeedback);
                 channelData[sample] = output;
