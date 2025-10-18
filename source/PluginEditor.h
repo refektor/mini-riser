@@ -3,12 +3,12 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
-class GrooveGlideAudioProcessorEditor : public juce::AudioProcessorEditor,
+class MiniRiserAudioProcessorEditor : public juce::AudioProcessorEditor,
                                         private juce::Timer
 {
 public:
-    GrooveGlideAudioProcessorEditor (GrooveGlideAudioProcessor&);
-    ~GrooveGlideAudioProcessorEditor() override;
+    MiniRiserAudioProcessorEditor (MiniRiserAudioProcessor&);
+    ~MiniRiserAudioProcessorEditor() override;
 
     void paint (juce::Graphics&) override;
     void resized() override;
@@ -22,7 +22,7 @@ private:
     std::optional<juce::WebBrowserComponent::Resource> getResource(const juce::String& url);
     juce::String getMimeForExtension(const juce::String& extension);
 
-    GrooveGlideAudioProcessor& audioProcessor;
+    MiniRiserAudioProcessor& audioProcessor;
     
     juce::WebSliderRelay impactRelay;
     juce::WebSliderParameterAttachment impactAttachment;
@@ -33,5 +33,5 @@ private:
     juce::Point<int> lastDragPosition;
     bool isDragging = false;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GrooveGlideAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MiniRiserAudioProcessorEditor)
 };

@@ -1,7 +1,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-GrooveGlideAudioProcessor::GrooveGlideAudioProcessor()
+MiniRiserAudioProcessor::MiniRiserAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
@@ -21,12 +21,12 @@ GrooveGlideAudioProcessor::GrooveGlideAudioProcessor()
     delayParams.feedback.setCurrentAndTargetValue(0.0f);
 }
 
-GrooveGlideAudioProcessor::~GrooveGlideAudioProcessor()
+MiniRiserAudioProcessor::~MiniRiserAudioProcessor()
 {
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout 
-GrooveGlideAudioProcessor::createParameterLayout(Parameters& parameters)
+MiniRiserAudioProcessor::createParameterLayout(Parameters& parameters)
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     
@@ -41,7 +41,7 @@ GrooveGlideAudioProcessor::createParameterLayout(Parameters& parameters)
     return layout;
 }
 
-void GrooveGlideAudioProcessor::parameterChanged(const juce::String& parameterID, float newValue)
+void MiniRiserAudioProcessor::parameterChanged(const juce::String& parameterID, float newValue)
 {
     if (parameterID == "impact") {
         impactSmoothed.setTargetValue(newValue);
@@ -49,12 +49,12 @@ void GrooveGlideAudioProcessor::parameterChanged(const juce::String& parameterID
     }
 }
 
-const juce::String GrooveGlideAudioProcessor::getName() const
+const juce::String MiniRiserAudioProcessor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool GrooveGlideAudioProcessor::acceptsMidi() const
+bool MiniRiserAudioProcessor::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput
     return true;
@@ -63,7 +63,7 @@ bool GrooveGlideAudioProcessor::acceptsMidi() const
    #endif
 }
 
-bool GrooveGlideAudioProcessor::producesMidi() const
+bool MiniRiserAudioProcessor::producesMidi() const
 {
    #if JucePlugin_ProducesMidiOutput
     return true;
@@ -72,7 +72,7 @@ bool GrooveGlideAudioProcessor::producesMidi() const
    #endif
 }
 
-bool GrooveGlideAudioProcessor::isMidiEffect() const
+bool MiniRiserAudioProcessor::isMidiEffect() const
 {
    #if JucePlugin_IsMidiEffect
     return true;
@@ -81,35 +81,35 @@ bool GrooveGlideAudioProcessor::isMidiEffect() const
    #endif
 }
 
-double GrooveGlideAudioProcessor::getTailLengthSeconds() const
+double MiniRiserAudioProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int GrooveGlideAudioProcessor::getNumPrograms()
+int MiniRiserAudioProcessor::getNumPrograms()
 {
     return 1;
 }
 
-int GrooveGlideAudioProcessor::getCurrentProgram()
+int MiniRiserAudioProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void GrooveGlideAudioProcessor::setCurrentProgram (int index)
+void MiniRiserAudioProcessor::setCurrentProgram (int index)
 {
 }
 
-const juce::String GrooveGlideAudioProcessor::getProgramName (int index)
+const juce::String MiniRiserAudioProcessor::getProgramName (int index)
 {
     return {};
 }
 
-void GrooveGlideAudioProcessor::changeProgramName (int index, const juce::String& newName)
+void MiniRiserAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
 }
 
-void GrooveGlideAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void MiniRiserAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     currentSampleRate = static_cast<float>(sampleRate);
     
@@ -151,12 +151,12 @@ void GrooveGlideAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     delayParams.writeIndex = 0;
 }
 
-void GrooveGlideAudioProcessor::releaseResources()
+void MiniRiserAudioProcessor::releaseResources()
 {
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool GrooveGlideAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool MiniRiserAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
     juce::ignoreUnused (layouts);
@@ -176,7 +176,7 @@ bool GrooveGlideAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
 }
 #endif
 
-void GrooveGlideAudioProcessor::updateEffectParameters(float impactValue)
+void MiniRiserAudioProcessor::updateEffectParameters(float impactValue)
 {
     float normalizedImpact = impactValue / 100.0f;
     
@@ -218,7 +218,7 @@ void GrooveGlideAudioProcessor::updateEffectParameters(float impactValue)
     delayParams.feedback.setTargetValue(normalizedImpact * 0.75f);
 }
 
-float GrooveGlideAudioProcessor::applyBitCrushing(float sample, float bitDepth)
+float MiniRiserAudioProcessor::applyBitCrushing(float sample, float bitDepth)
 {
     if (bitDepth >= 24.0f) return sample;
     
@@ -226,7 +226,7 @@ float GrooveGlideAudioProcessor::applyBitCrushing(float sample, float bitDepth)
     return std::round(sample / quantizationStep) * quantizationStep;
 }
 
-void GrooveGlideAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void MiniRiserAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
@@ -317,23 +317,23 @@ void GrooveGlideAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     }
 }
 
-bool GrooveGlideAudioProcessor::hasEditor() const
+bool MiniRiserAudioProcessor::hasEditor() const
 {
     return true;
 }
 
-juce::AudioProcessorEditor* GrooveGlideAudioProcessor::createEditor()
+juce::AudioProcessorEditor* MiniRiserAudioProcessor::createEditor()
 {
-    return new GrooveGlideAudioProcessorEditor (*this);
+    return new MiniRiserAudioProcessorEditor (*this);
 }
 
-void GrooveGlideAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+void MiniRiserAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto xml = state.copyState().createXml();
     copyXmlToBinary(*xml, destData);
 }
 
-void GrooveGlideAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void MiniRiserAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     auto xmlState = getXmlFromBinary(data, sizeInBytes);
     if (xmlState.get() != nullptr)
@@ -343,5 +343,5 @@ void GrooveGlideAudioProcessor::setStateInformation (const void* data, int sizeI
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new GrooveGlideAudioProcessor();
+    return new MiniRiserAudioProcessor();
 }

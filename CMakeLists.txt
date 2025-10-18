@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(GrooveGlide VERSION 1.0.0)
+project(MiniRiser VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -28,7 +28,7 @@ CPMAddPackage(
 # Plugin configuration
 juce_add_plugin(${PROJECT_NAME}
     COMPANY_NAME "Audio Innovators"
-    BUNDLE_ID "com.audioinnovators.grooveglide"
+    BUNDLE_ID "com.audioinnovators.miniriser"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE
@@ -36,10 +36,10 @@ juce_add_plugin(${PROJECT_NAME}
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
     COPY_PLUGIN_AFTER_BUILD TRUE
     PLUGIN_MANUFACTURER_CODE AUDI
-    PLUGIN_CODE GrGl
+    PLUGIN_CODE MrSr
     NEEDS_WEBVIEW2 TRUE
     FORMATS VST3 AU Standalone
-    PRODUCT_NAME "Groove Glide"
+    PRODUCT_NAME "MRS-R"
 )
 
 # Source files

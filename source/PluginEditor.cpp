@@ -1,7 +1,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-GrooveGlideAudioProcessorEditor::GrooveGlideAudioProcessorEditor (GrooveGlideAudioProcessor& p)
+MiniRiserAudioProcessorEditor::MiniRiserAudioProcessorEditor (MiniRiserAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p),
       impactRelay{"impact"},
       impactAttachment{*audioProcessor.getState().getParameter("impact"), impactRelay},
@@ -24,21 +24,21 @@ GrooveGlideAudioProcessorEditor::GrooveGlideAudioProcessorEditor (GrooveGlideAud
     //setResizeLimits(600, 400, 1200, 800);
 }
 
-GrooveGlideAudioProcessorEditor::~GrooveGlideAudioProcessorEditor()
+MiniRiserAudioProcessorEditor::~MiniRiserAudioProcessorEditor()
 {
 }
 
-void GrooveGlideAudioProcessorEditor::paint (juce::Graphics& g)
+void MiniRiserAudioProcessorEditor::paint (juce::Graphics& g)
 {
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 }
 
-void GrooveGlideAudioProcessorEditor::resized()
+void MiniRiserAudioProcessorEditor::resized()
 {
     webView.setBounds(getLocalBounds());
 }
 
-void GrooveGlideAudioProcessorEditor::mouseDown(const juce::MouseEvent& e)
+void MiniRiserAudioProcessorEditor::mouseDown(const juce::MouseEvent& e)
 {
     // Store the initial position of the mouse
     lastDragPosition = e.getPosition();
@@ -48,7 +48,7 @@ void GrooveGlideAudioProcessorEditor::mouseDown(const juce::MouseEvent& e)
     webView.mouseDown(e.getEventRelativeTo(&webView));
 }
 
-void GrooveGlideAudioProcessorEditor::mouseDrag(const juce::MouseEvent& e)
+void MiniRiserAudioProcessorEditor::mouseDrag(const juce::MouseEvent& e)
 {
     // Calculate drag distance to detect significant movement
     auto currentPos = e.getPosition();
@@ -69,7 +69,7 @@ void GrooveGlideAudioProcessorEditor::mouseDrag(const juce::MouseEvent& e)
     }
 }
 
-void GrooveGlideAudioProcessorEditor::mouseUp(const juce::MouseEvent& e)
+void MiniRiserAudioProcessorEditor::mouseUp(const juce::MouseEvent& e)
 {
     // Reset drag state
     isDragging = false;
@@ -78,12 +78,12 @@ void GrooveGlideAudioProcessorEditor::mouseUp(const juce::MouseEvent& e)
     webView.mouseUp(e.getEventRelativeTo(&webView));
 }
 
-void GrooveGlideAudioProcessorEditor::timerCallback()
+void MiniRiserAudioProcessorEditor::timerCallback()
 {
     // Timer callback for potential future use
 }
 
-juce::String GrooveGlideAudioProcessorEditor::getMimeForExtension(const juce::String& extension)
+juce::String MiniRiserAudioProcessorEditor::getMimeForExtension(const juce::String& extension)
 {
     static juce::HashMap<juce::String, juce::String> mimeMap;
     static bool initialized = false;
@@ -109,7 +109,7 @@ juce::String GrooveGlideAudioProcessorEditor::getMimeForExtension(const juce::St
 }
 
 std::optional<juce::WebBrowserComponent::Resource> 
-GrooveGlideAudioProcessorEditor::getResource(const juce::String& url)
+MiniRiserAudioProcessorEditor::getResource(const juce::String& url)
 {
     // Debug logging to file
     juce::File debugFile = juce::File::getSpecialLocation(juce::File::userDesktopDirectory)

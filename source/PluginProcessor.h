@@ -2,12 +2,12 @@
 
 #include <JuceHeader.h>
 
-class GrooveGlideAudioProcessor : public juce::AudioProcessor,
+class MiniRiserAudioProcessor : public juce::AudioProcessor,
                                   public juce::AudioProcessorValueTreeState::Listener
 {
 public:
-    GrooveGlideAudioProcessor();
-    ~GrooveGlideAudioProcessor() override;
+    MiniRiserAudioProcessor();
+    ~MiniRiserAudioProcessor() override;
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -95,5 +95,5 @@ private:
     float applyBitCrushing(float sample, float bitDepth);
     void updateEffectParameters(float impactValue);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GrooveGlideAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MiniRiserAudioProcessor)
 };
