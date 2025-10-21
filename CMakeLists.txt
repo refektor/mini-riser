@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(MiniRiser VERSION 1.0.0)
+project(MRS-R VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -27,7 +27,7 @@ CPMAddPackage(
 
 # Plugin configuration
 juce_add_plugin(${PROJECT_NAME}
-    COMPANY_NAME "Audio Innovators"
+    COMPANY_NAME "Stairway Audio"
     BUNDLE_ID "com.audioinnovators.miniriser"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE

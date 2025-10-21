@@ -1,3 +1,6 @@
+# Windows executables from Inno
+Output/
+
 # Build directories
 build/
 cmake-build-*/
