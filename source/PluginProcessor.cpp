@@ -315,6 +315,14 @@ void MiniRiserAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
             delayParams.writeIndex = (delayParams.writeIndex + 1) % delayParams.delayBuffer.getNumSamples();
         }
     }
+
+    if (currentImpact > 0.25f) {
+        constexpr float gainCurveExponent = 1.0f;
+        const float normalizedImpact = juce::jlimit(0.0f, 1.0f, (currentImpact - 0.20f) / 0.75f);
+        const float shapedImpact = std::pow(normalizedImpact, gainCurveExponent);
+        const float gainDb = shapedImpact * 10.0f;
+        buffer.applyGain(juce::Decibels::decibelsToGain(gainDb));
+    }
 }
 
 bool MiniRiserAudioProcessor::hasEditor() const
