@@ -266,23 +266,24 @@ void MiniRiserAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         
         auto* leftData = buffer.getWritePointer(0);
         auto* rightData = buffer.getWritePointer(1);
-        
-        for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+        const int numSamples = buffer.getNumSamples();
+        const float panDepth = juce::jlimit(0.0f, 0.8f, currentImpact);
+        const bool applyAutoPan = panDepth > 0.0f;
+
+        for (int sample = 0; sample < numSamples; ++sample) {
             leftData[sample] = applyBitCrushing(leftData[sample], bitCrusherParams.bitDepth);
             rightData[sample] = applyBitCrushing(rightData[sample], bitCrusherParams.bitDepth);
-        }
-        
-        if (currentImpact > 0.0f) {
+
             float lfoValue = lfoForPanning.processSample(0.0f);
-            // Apply impact scaling to LFO for panning depth control
-            float panAmount = lfoValue * currentImpact;
-            
-            // Equal-power panning: when pan = 0, both channels at full volume
-            // when pan = ±1, signal fully to one side
-            float leftGain = std::cos((panAmount + 1.0f) * juce::MathConstants<float>::pi * 0.25f);
-            float rightGain = std::sin((panAmount + 1.0f) * juce::MathConstants<float>::pi * 0.25f);
-            
-            for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+
+            if (applyAutoPan) {
+                float panAmount = lfoValue * panDepth;
+
+                // Equal-power panning keeps perceived loudness stable across the sweep
+                float panAngle = (panAmount + 1.0f) * juce::MathConstants<float>::pi * 0.25f;
+                float leftGain = std::cos(panAngle);
+                float rightGain = std::sin(panAngle);
+
                 leftData[sample] *= leftGain;
                 rightData[sample] *= rightGain;
             }
